@@ -3,11 +3,11 @@ from djgeojson.fields import PolygonField
 
 
 class Provider(models.Model):
-    name = models.CharField(max_length=100, blank=False, default = '')
-    email = models.EmailField(max_length=100, blank=False, default = '')
-    phone = models.CharField(max_length=100, blank=False, default = '') 
-    language = models.CharField(max_length=100, blank=False, default = '')
-    currency = models.CharField(max_length=3, blank=False, default = '')
+    name = models.CharField(max_length=100, blank=False)
+    email = models.EmailField(max_length=100, blank=False)
+    phone = models.CharField(max_length=50) 
+    language = models.CharField(max_length=100, blank=False)
+    currency = models.CharField(max_length=3, blank=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     
@@ -17,7 +17,7 @@ class Provider(models.Model):
 
 class ServiceArea(models.Model):
     name = models.CharField(max_length=100, blank=False, default = '')
-    price = models.DecimalField(blank=False, default = '')
+    price = models.FloatField()
     polygon = PolygonField()
     information = models.CharField(max_length=100, blank=False, default = '')
     active = models.BooleanField()
