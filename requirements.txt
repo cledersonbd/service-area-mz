@@ -1,0 +1,4 @@
+django
+djangorestframework
+django-geojson
+psycopg2-binary
