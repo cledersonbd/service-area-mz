@@ -5,3 +5,4 @@ django-geojson
 geojson
 psycopg2-binary
 faker
+django-environ
