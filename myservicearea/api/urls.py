@@ -3,6 +3,7 @@ from . import views
 
 
 urlpatterns = [
+    path('', views.api_root),
     path('provider', 
          views.ProviderList.as_view(), 
          name='provider-list'),

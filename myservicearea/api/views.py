@@ -1,13 +1,21 @@
-from rest_framework.parsers import JSONParser
-from rest_framework.decorators import APIView
+from rest_framework.decorators import APIView, api_view
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework import status, generics, permissions
-from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse, HttpResponse
 from django.contrib.gis.geos import Point
 from .models import ServiceArea, Provider
-from .serializers import ProviderSerializer, ServiceAreaSerializer, AreaLookupSerializer
 from .permissions import IsOwnerOrReadOnly
+from .serializers import ProviderSerializer, ServiceAreaSerializer, AreaLookupSerializer
 
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'providers': reverse('provider-list', request=request, format=format),
+        'service-areas': reverse('service-area-list', request=request, format=format)
+    })
 
 class ProviderList(generics.ListCreateAPIView):
     queryset = Provider.objects.all()
