@@ -1,4 +1,6 @@
 django
 djangorestframework
+djangorestframework-gis
 django-geojson
+geojson
 psycopg2-binary

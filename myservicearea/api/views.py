@@ -1,41 +1,66 @@
-from rest_framework import generics
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import APIView
+from rest_framework import status, mixins, generics
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponse
+from django.http.response import JsonResponse, HttpResponse
+from django.contrib.gis.geos import Point
 from .models import ServiceArea, Provider
 from .serializers import ProviderSerializer, ServiceAreaSerializer
 
 
-class ProviderView(APIView):
+class ProviderList(generics.ListCreateAPIView):
+    queryset = Provider.objects.all()
+    serializer_class = ProviderSerializer
     
-    def get(self, request, format=None):
-        result = Provider.objects.all()
-        serializer = ProviderSerializer(result, many=True)        
-        return JsonResponse(serializer.data, safe=False)
+class ProviderDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Provider.objects.all()
+    serializer_class = ProviderSerializer
+
+
+class ServiceAreaList(APIView):
     
+    def get(self, request, id=None):
+        
+        if id: 
+            try:                
+                result = ServiceArea.objects.get(id=id)
+            except ServiceArea.DoesNotExist:
+                return HttpResponse(status=404)
+            
+            return JsonResponse(ServiceAreaSerializer(result).data, safe=False)
+        
+        return JsonResponse(
+            ServiceAreaSerializer(ServiceArea.objects.all(), many=True).data, 
+            safe=False)
+        
     def post(self, request):
+        
+        print(request)
         data = JSONParser().parse(request)
-        serializer = ProviderSerializer(data=data)
+        serializer = ServiceAreaSerializer(data=data)
         
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
+            return JsonResponse(serializer.data, safe=False, status=201)
         
         return JsonResponse(serializer.errors, status=400)
     
-    @csrf_exempt
-    def provider_detail(request, id):
-                
-        try:
-            result = Provider.objects.get(id=id)
-        except Provider.DoesNotExist:
-            return HttpResponse(status=404)
+    
+class LookupList(APIView):
+    
+    def get(self, request):
         
-        return JsonResponse(ProviderSerializer(result).data, safe=False)
-
-
-class ServiceAreaList(generics.ListCreateAPIView):
-    queryset = ServiceArea.objects.all()
-    serializer_class = ServiceAreaSerializer
+        point = Point(
+            (float(request.query_params['lat']), 
+             float(request.query_params['lon']))
+        )
+        
+        result = ServiceAreaSerializer(
+            ServiceArea.objects.filter(area__contains=point), many=True)
+        
+        return JsonResponse(result.data, safe=False)
+        # return JsonResponse({
+        #     'lat': request.query_params['lat'], 
+        #     'lon': request.query_params['lon']
+        #     }, safe=False)
     
