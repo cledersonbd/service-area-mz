@@ -1,52 +1,45 @@
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import APIView
-from rest_framework import status, mixins, generics
+from rest_framework import status, generics, permissions
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse, HttpResponse
 from django.contrib.gis.geos import Point
 from .models import ServiceArea, Provider
-from .serializers import ProviderSerializer, ServiceAreaSerializer
+from .serializers import ProviderSerializer, ServiceAreaSerializer, AreaLookupSerializer
+from .permissions import IsOwnerOrReadOnly
 
 
 class ProviderList(generics.ListCreateAPIView):
     queryset = Provider.objects.all()
     serializer_class = ProviderSerializer
     
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+    
 class ProviderDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Provider.objects.all()
     serializer_class = ProviderSerializer
-
-
-class ServiceAreaList(APIView):
     
-    def get(self, request, id=None):
-        
-        if id: 
-            try:                
-                result = ServiceArea.objects.get(id=id)
-            except ServiceArea.DoesNotExist:
-                return HttpResponse(status=404)
-            
-            return JsonResponse(ServiceAreaSerializer(result).data, safe=False)
-        
-        return JsonResponse(
-            ServiceAreaSerializer(ServiceArea.objects.all(), many=True).data, 
-            safe=False)
-        
-    def post(self, request):
-        
-        print(request)
-        data = JSONParser().parse(request)
-        serializer = ServiceAreaSerializer(data=data)
-        
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, safe=False, status=201)
-        
-        return JsonResponse(serializer.errors, status=400)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, 
+                          IsOwnerOrReadOnly]
     
+class ServiceAreaList(generics.ListCreateAPIView):
+    queryset = ServiceArea.objects.all()
+    serializer_class = ServiceAreaSerializer
+    
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+class ServiceAreaDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ServiceArea.objects.all()
+    serializer_class = ServiceAreaSerializer
+    
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, 
+                          IsOwnerOrReadOnly]
     
 class LookupList(APIView):
+    
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     def get(self, request):
         
@@ -54,13 +47,18 @@ class LookupList(APIView):
             (float(request.query_params['lat']), 
              float(request.query_params['lon']))
         )
+        # perform 2 polkygon searches - within and intersection
+        intersects = AreaLookupSerializer(
+            ServiceArea.objects.filter(area__intersects=point), many=True)
+        within = AreaLookupSerializer(
+            ServiceArea.objects.filter(area__within=point), many=True)
         
-        result = ServiceAreaSerializer(
-            ServiceArea.objects.filter(area__contains=point), many=True)
+        result = intersects.data
+        result.extend(within.data)
         
-        return JsonResponse(result.data, safe=False)
-        # return JsonResponse({
-        #     'lat': request.query_params['lat'], 
-        #     'lon': request.query_params['lon']
-        #     }, safe=False)
+        # TODO improve the fail case (faster method)
+        if len(result) > 0:
+            return JsonResponse(result, safe=False)
+        
+        return HttpResponse(status=status.HTTP_404_NOT_FOUND)
     

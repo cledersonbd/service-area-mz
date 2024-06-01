@@ -10,6 +10,8 @@ class Provider(models.Model):
     currency = models.CharField(max_length=3, blank=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey('auth.User', related_name='providers', 
+                             on_delete=models.CASCADE, default=1)
     
     class Meta:
         db_table = 'providers'
@@ -26,6 +28,8 @@ class ServiceArea(models.Model):
                                  on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey('auth.User', related_name='areas', 
+                             on_delete=models.CASCADE, default=1)
     
     class Meta:
         db_table = 'service_areas'
