@@ -15,9 +15,11 @@ class ServiceAreaSerializer(serializers.GeoModelSerializer):
         model = ServiceArea
         geo_field = 'area'
         fields = '__all__'
+        
 
 class AreaLookupSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer()
     class Meta:
         model = ServiceArea
         fields = ['name', 'area', 'provider']
+        

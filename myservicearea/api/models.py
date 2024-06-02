@@ -15,6 +15,7 @@ class Provider(models.Model):
     
     class Meta:
         db_table = 'providers'
+        ordering = ['id']
 
 
 class ServiceArea(models.Model):
@@ -32,5 +33,6 @@ class ServiceArea(models.Model):
     
     class Meta:
         db_table = 'service_areas'
+        ordering = ['provider', 'id']
         
         
