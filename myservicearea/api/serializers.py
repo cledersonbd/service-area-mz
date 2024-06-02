@@ -20,4 +20,4 @@ class AreaLookupSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer()
     class Meta:
         model = ServiceArea
-        fields = ['name', 'area', 'provider', 'information']
+        fields = ['name', 'area', 'provider']

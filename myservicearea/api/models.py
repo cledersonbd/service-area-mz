@@ -21,7 +21,6 @@ class ServiceArea(models.Model):
     name = models.CharField(max_length=100, blank=False, default = '')
     price = models.FloatField()
     area = models.PolygonField(default=None)
-    information = models.CharField(max_length=100, blank=False, default = '')
     active = models.BooleanField()
     provider = models.ForeignKey(Provider, 
                                  related_name='areas', 
