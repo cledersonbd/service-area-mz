@@ -46,11 +46,19 @@ class ServiceAreaDetail(generics.RetrieveUpdateDestroyAPIView):
                           IsOwnerOrReadOnly]
     
 class LookupList(APIView):
-    
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     def get(self, request):
-        
+        """Return the combination of two db searches:
+        1) service area intersecting with given point
+        2) service area containing given point
+
+        Args:
+            request (Request): 
+
+        Returns:
+            Any: 
+        """
         point = Point(
             (float(request.query_params['lat']), 
              float(request.query_params['lon']))
