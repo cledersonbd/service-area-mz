@@ -15,7 +15,7 @@ Requirement:
 
 + Create a Github account (if you don’t have one), push all your code and share the link with us;
 
-+ Deploy your code to a hosting service of your choice. Mozio is built entirely on AWS, so bonus points will be awarded for use of AWS.
++ Deploy your code to a hosting service of your choice. <company_name> is built entirely on AWS, so bonus points will be awarded for use of AWS.
 
 
 
